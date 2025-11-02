@@ -17,51 +17,49 @@ KarpichIMatrixElemSumMPI::KarpichIMatrixElemSumMPI(const InType &in) {
 }
 
 bool KarpichIMatrixElemSumMPI::ValidationImpl() {
-  return (GetInput() > 0) && (GetOutput() == 0);
+  int n = std::get<0>(GetInput());
+  int m = std::get<1>(GetInput());
+  std::vector<int> val = std::get<2>(GetInput());
+
+  return (n > 0) && (m > 0) && (val.size() == (n + m));
 }
 
 bool KarpichIMatrixElemSumMPI::PreProcessingImpl() {
-  GetOutput() = 2 * GetInput();
-  return GetOutput() > 0;
+  return true;
 }
 
 bool KarpichIMatrixElemSumMPI::RunImpl() {
-  auto input = GetInput();
-  if (input == 0) {
+  int n = std::get<0>(GetInput());
+  int m = std::get<1>(GetInput());
+  std::vector<int> val = std::get<2>(GetInput());
+  if((n > 0) && (m > 0) && (val.size() == (n + m))) {
     return false;
   }
+  int rank = 0
+  int mpi_size = 0
+  MPI_Comm_rank(&rank, MPI_COMM_WORLD);
+  MPI_Comm_soze(&mpi_size, MPI_COMM_WORLD);
+  
+  std::size_t iter = val.size() / mpi_size;
+  std::size_t start = iter * rank;
+  std::size_t end = iter * (rank+1);
 
-  for (InType i = 0; i < GetInput(); i++) {
-    for (InType j = 0; j < GetInput(); j++) {
-      for (InType k = 0; k < GetInput(); k++) {
-        std::vector<InType> tmp(i + j + k, 1);
-        GetOutput() += std::accumulate(tmp.begin(), tmp.end(), 0);
-        GetOutput() -= i + j + k;
-      }
-    }
+  if(rank == npi_size - 1) {
+    end = val.size();
   }
 
-  const int num_threads = ppc::util::GetNumThreads();
-  GetOutput() *= num_threads;
-
-  int rank = 0;
-  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
-  if (rank == 0) {
-    GetOutput() /= num_threads;
-  } else {
-    int counter = 0;
-    for (int i = 0; i < num_threads; i++) {
-      counter++;
-    }
-
-    if (counter != 0) {
-      GetOutput() /= counter;
-    }
+  long sum = 0;
+  for(int i = start; i < end; i++) {
+    sum += val[i];
   }
 
-  MPI_Barrier(MPI_COMM_WORLD);
-  return GetOutput() > 0;
+  const long send_sum = sum;
+  MPI_Reduce(&send_sum, sum, 1, MPI_LONG, MPI_SUM, 0, MPI_COMM_WORLD);
+  MPI_Bcast(&sum, 1, MPI_LONG, 0, MPI_COMM_WOWLD);
+
+  GetOutput() = sum;
+
+  return true;
 }
 
 bool KarpichIMatrixElemSumMPI::PostProcessingImpl() {

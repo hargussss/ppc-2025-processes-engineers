@@ -14,46 +14,38 @@ KarpichIMatrixElemSumSEQ::KarpichIMatrixElemSumSEQ(const InType &in) {
 }
 
 bool KarpichIMatrixElemSumSEQ::ValidationImpl() {
-  return (GetInput() > 0) && (GetOutput() == 0);
+  int n = std::get<0>(GetInput());
+  int m = std::get<1>(GetInput());
+  std::vector<int> val = std::get<2>(GetInput());
+
+  return (n > 0) && (m > 0) && (val.size() == (n + m));
 }
 
 bool KarpichIMatrixElemSumSEQ::PreProcessingImpl() {
-  GetOutput() = 2 * GetInput();
-  return GetOutput() > 0;
+  return true;
 }
 
 bool KarpichIMatrixElemSumSEQ::RunImpl() {
-  if (GetInput() == 0) {
+  // if (GetInput() == 0) {
+  //   return false;
+  // }
+  int n = std::get<0>(GetInput());
+  int m = std::get<1>(GetInput());
+  std::vector<int> val = std::get<2>(GetInput());
+  if((n > 0) && (m > 0) && (val.size() == (n + m))) {
     return false;
   }
 
-  for (InType i = 0; i < GetInput(); i++) {
-    for (InType j = 0; j < GetInput(); j++) {
-      for (InType k = 0; k < GetInput(); k++) {
-        std::vector<InType> tmp(i + j + k, 1);
-        GetOutput() += std::accumulate(tmp.begin(), tmp.end(), 0);
-        GetOutput() -= i + j + k;
-      }
-    }
+  long sum = 0;
+  for(int i = 0; i < val.size(); i++) {
+    sum += val[i];
   }
-
-  const int num_threads = ppc::util::GetNumThreads();
-  GetOutput() *= num_threads;
-
-  int counter = 0;
-  for (int i = 0; i < num_threads; i++) {
-    counter++;
-  }
-
-  if (counter != 0) {
-    GetOutput() /= counter;
-  }
-  return GetOutput() > 0;
+  GetOutput() = sum;
+  return true;
 }
 
 bool KarpichIMatrixElemSumSEQ::PostProcessingImpl() {
-  GetOutput() -= GetInput();
-  return GetOutput() > 0;
+  return true;
 }
 
 }  // namespace karpich_i_matrix_elem_sum
