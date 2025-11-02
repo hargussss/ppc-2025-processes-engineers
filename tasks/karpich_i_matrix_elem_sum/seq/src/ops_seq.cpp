@@ -14,11 +14,11 @@ KarpichIMatrixElemSumSEQ::KarpichIMatrixElemSumSEQ(const InType &in) {
 }
 
 bool KarpichIMatrixElemSumSEQ::ValidationImpl() {
-  int n = std::get<0>(GetInput());
-  int m = std::get<1>(GetInput());
+  std::size_t n = std::get<0>(GetInput());
+  std::size_t m = std::get<1>(GetInput());
   std::vector<int> val = std::get<2>(GetInput());
 
-  return (n > 0) && (m > 0) && (val.size() == (n + m));
+  return (n > 0) && (m > 0) && (val.size() == (n * m));
 }
 
 bool KarpichIMatrixElemSumSEQ::PreProcessingImpl() {
@@ -29,15 +29,15 @@ bool KarpichIMatrixElemSumSEQ::RunImpl() {
   // if (GetInput() == 0) {
   //   return false;
   // }
-  int n = std::get<0>(GetInput());
-  int m = std::get<1>(GetInput());
+  std::size_t n = std::get<0>(GetInput());
+  std::size_t m = std::get<1>(GetInput());
   std::vector<int> val = std::get<2>(GetInput());
-  if((n > 0) && (m > 0) && (val.size() == (n + m))) {
+  if(((n > 0) && (m > 0) && (val.size() == (n * m))) == false) {
     return false;
   }
 
   long sum = 0;
-  for(int i = 0; i < val.size(); i++) {
+  for(std::size_t i = 0; i < val.size(); i++) {
     sum += val[i];
   }
   GetOutput() = sum;

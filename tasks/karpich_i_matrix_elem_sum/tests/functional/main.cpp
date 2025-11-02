@@ -5,6 +5,7 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <fstream>
 #include <numeric>
 #include <stdexcept>
 #include <string>
@@ -23,35 +24,36 @@ namespace karpich_i_matrix_elem_sum {
 class KarpichIMatrixElemSumTests : public ppc::util::BaseRunFuncTests<InType, OutType, TestType> {
  public:
   static std::string PrintTestParam(const TestType &test_param) {
-    return std::to_string(std::get<0>(test_param)) + "_" + std::get<1>(test_param);
+    return std::get<0>(test_param);
   }
 
  protected:
   void SetUp() override {
-    int width = -1;
-    int height = -1;
-    int channels = -1;
-    std::vector<uint8_t> img;
+    TestType params = std::get<static_cast<std::size_t>(ppc::util::GTestParamIndex::kTestParams)>(GetParam());
+    std::size_t n = 0;
+    std::size_t m = 0;
+
     // Read image
     {
-      std::string abs_path = ppc::util::GetAbsoluteTaskPath(PPC_ID_karpich_i_matrix_elem_sum, "pic.jpg");
-      auto *data = stbi_load(abs_path.c_str(), &width, &height, &channels, 0);
-      if (data == nullptr) {
-        throw std::runtime_error("Failed to load image: " + std::string(stbi_failure_reason()));
+      std::string local = std::get<0>(params) + ".txt";
+      std::string abs_path = ppc::util::GetAbsoluteTaskPath(PPC_ID_karpich_i_matrix_elem_sum, local);
+      std::ifstream file(abs_path);
+      if (file.is_open() == false) {
+        throw std::runtime_error("Failed to open file: " + abs_path);
       }
-      img = std::vector<uint8_t>(data, data + (static_cast<ptrdiff_t>(width * height * channels)));
-      stbi_image_free(data);
-      if (std::cmp_not_equal(width, height)) {
-        throw std::runtime_error("width != height: ");
+
+      file >> n;
+      file >> m;
+      std::vector<int> val(n * m);
+      for (std::size_t i = 0; i < val.size(); i++) {
+        file >> val[i];
       }
+      input_data_ = std::make_tuple(n, m, val);
     }
-
-    TestType params = std::get<static_cast<std::size_t>(ppc::util::GTestParamIndex::kTestParams)>(GetParam());
-    input_data_ = width - height + std::min(std::accumulate(img.begin(), img.end(), 0), channels);
+    correct_test_output_data_ = std::get<1>(params);
   }
-
   bool CheckTestOutputData(OutType &output_data) final {
-    return (input_data_ == output_data);
+    return output_data == correct_test_output_data_;
   }
 
   InType GetTestInputData() final {
@@ -59,7 +61,8 @@ class KarpichIMatrixElemSumTests : public ppc::util::BaseRunFuncTests<InType, Ou
   }
 
  private:
-  InType input_data_ = 0;
+  InType input_data_;
+  long correct_test_output_data_;
 };
 
 namespace {
@@ -68,11 +71,15 @@ TEST_P(KarpichIMatrixElemSumTests, MatmulFromPic) {
   ExecuteTest(GetParam());
 }
 
-const std::array<TestType, 3> kTestParam = {std::make_tuple(3, "3"), std::make_tuple(5, "5"), std::make_tuple(7, "7")};
+const std::array<TestType, 7> kTestParam = {
+    std::make_tuple("test_matrix_3_3", 9),   std::make_tuple("test_matrix_5_5", 110),
+    std::make_tuple("test_matrix_7_7", 219), std::make_tuple("test_matrix_10_10", 450),
+    std::make_tuple("test_matrix_3_8", 106), std::make_tuple("test_matrix_4_6", 105),
+    std::make_tuple("test_matrix_6_3", 81)};
 
-const auto kTestTasksList =
-    std::tuple_cat(ppc::util::AddFuncTask<KarpichIMatrixElemSumMPI, InType>(kTestParam, PPC_SETTINGS_karpich_i_matrix_elem_sum),
-                   ppc::util::AddFuncTask<KarpichIMatrixElemSumSEQ, InType>(kTestParam, PPC_SETTINGS_karpich_i_matrix_elem_sum));
+const auto kTestTasksList = std::tuple_cat(
+    ppc::util::AddFuncTask<KarpichIMatrixElemSumMPI, InType>(kTestParam, PPC_SETTINGS_karpich_i_matrix_elem_sum),
+    ppc::util::AddFuncTask<KarpichIMatrixElemSumSEQ, InType>(kTestParam, PPC_SETTINGS_karpich_i_matrix_elem_sum));
 
 const auto kGtestValues = ppc::util::ExpandToValues(kTestTasksList);
 
