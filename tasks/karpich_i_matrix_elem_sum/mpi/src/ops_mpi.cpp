@@ -2,11 +2,9 @@
 
 #include <mpi.h>
 
-#include <numeric>
 #include <vector>
 
 #include "karpich_i_matrix_elem_sum/common/include/common.hpp"
-#include "util/include/util.hpp"
 
 namespace karpich_i_matrix_elem_sum {
 

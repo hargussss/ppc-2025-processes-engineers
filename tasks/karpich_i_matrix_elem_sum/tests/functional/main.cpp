@@ -1,16 +1,13 @@
 #include <gtest/gtest.h>
 #include <stb/stb_image.h>
 
-#include <algorithm>
 #include <array>
 #include <cstddef>
-#include <cstdint>
 #include <fstream>
-#include <numeric>
+#include <random>
 #include <stdexcept>
 #include <string>
 #include <tuple>
-#include <utility>
 #include <vector>
 
 #include "karpich_i_matrix_elem_sum/common/include/common.hpp"
@@ -32,10 +29,14 @@ class KarpichIMatrixElemSumTests : public ppc::util::BaseRunFuncTests<InType, Ou
     TestType params = std::get<static_cast<std::size_t>(ppc::util::GTestParamIndex::kTestParams)>(GetParam());
     std::size_t n = 0;
     std::size_t m = 0;
-
-    // Read image
-    {
-      std::string local = std::get<0>(params) + ".txt";
+    std::string first_param = std::get<0>(params);
+    if (first_param == "gen") {
+      n = std::get<1>(params);
+      m = n;
+      std::vector<int> val = GenMatrix(n, m, 777);
+      input_data_ = std::make_tuple(n, m, val);
+    } else {
+      std::string local = first_param + ".txt";
       std::string abs_path = ppc::util::GetAbsoluteTaskPath(PPC_ID_karpich_i_matrix_elem_sum, local);
       std::ifstream file(abs_path);
       if (file.is_open() == false) {
@@ -49,8 +50,8 @@ class KarpichIMatrixElemSumTests : public ppc::util::BaseRunFuncTests<InType, Ou
         file >> val[i];
       }
       input_data_ = std::make_tuple(n, m, val);
+      correct_test_output_data_ = std::get<1>(params);
     }
-    correct_test_output_data_ = std::get<1>(params);
   }
   bool CheckTestOutputData(OutType &output_data) final {
     return output_data == correct_test_output_data_;
@@ -63,6 +64,18 @@ class KarpichIMatrixElemSumTests : public ppc::util::BaseRunFuncTests<InType, Ou
  private:
   InType input_data_;
   long correct_test_output_data_;
+  std::vector<int> GenMatrix(std::size_t n, std::size_t m, int seed) {
+    std::mt19937 gen(seed);
+    std::uniform_int_distribution<> idis;
+    std::vector<int> res(n * m);
+    correct_test_output_data_ = 0;
+
+    for (std::size_t i = 0; i < n * m; i++) {
+      res[i] = idis(gen);
+      correct_test_output_data_ += res[i];
+    }
+    return res;
+  }
 };
 
 namespace {
@@ -71,11 +84,11 @@ TEST_P(KarpichIMatrixElemSumTests, MatmulFromPic) {
   ExecuteTest(GetParam());
 }
 
-const std::array<TestType, 7> kTestParam = {
+const std::array<TestType, 8> kTestParam = {
     std::make_tuple("test_matrix_3_3", 9),   std::make_tuple("test_matrix_5_5", 110),
     std::make_tuple("test_matrix_7_7", 219), std::make_tuple("test_matrix_10_10", 450),
     std::make_tuple("test_matrix_3_8", 106), std::make_tuple("test_matrix_4_6", 105),
-    std::make_tuple("test_matrix_6_3", 81)};
+    std::make_tuple("test_matrix_6_3", 81),  std::make_tuple("gen", 100)};
 
 const auto kTestTasksList = std::tuple_cat(
     ppc::util::AddFuncTask<KarpichIMatrixElemSumMPI, InType>(kTestParam, PPC_SETTINGS_karpich_i_matrix_elem_sum),
