@@ -10,8 +10,8 @@
 namespace karpich_i_matrix_elem_sum {
 
 class KarpichIMatrixElemSumPerfTest : public ppc::util::BaseRunPerfTests<InType, OutType> {
-  std::size_t n = 2000;
-  std::size_t m = 2000;
+  std::size_t n = 10000;
+  std::size_t m = 10000;
   long correct_test_output_data_;
   InType input_data_;
 

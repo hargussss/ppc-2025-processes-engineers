@@ -29,7 +29,7 @@ bool KarpichIMatrixElemSumMPI::PreProcessingImpl() {
 bool KarpichIMatrixElemSumMPI::RunImpl() {
   std::size_t n = std::get<0>(GetInput());
   std::size_t m = std::get<1>(GetInput());
-  std::vector<int> val = std::get<2>(GetInput());
+  std::vector<int>& val = std::get<2>(GetInput());
   if (((n > 0) && (m > 0) && (val.size() == (n * m))) == false) {
     return false;
   }
@@ -40,7 +40,7 @@ bool KarpichIMatrixElemSumMPI::RunImpl() {
 
   std::size_t iter = val.size() / mpi_size;
   std::size_t start = iter * rank;
-  std::size_t end = iter * (rank + 1);
+  std::size_t end = start + iter;
 
   if (rank == mpi_size - 1) {
     end = val.size();
