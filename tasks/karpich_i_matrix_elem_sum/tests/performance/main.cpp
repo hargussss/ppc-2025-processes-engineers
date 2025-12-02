@@ -1,6 +1,10 @@
 #include <gtest/gtest.h>
 
+#include <cstddef>
+#include <cstdint>
 #include <random>
+#include <tuple>
+#include <vector>
 
 #include "karpich_i_matrix_elem_sum/common/include/common.hpp"
 #include "karpich_i_matrix_elem_sum/mpi/include/ops_mpi.hpp"
@@ -15,7 +19,7 @@ class KarpichIMatrixElemSumPerfTest : public ppc::util::BaseRunPerfTests<InType,
   std::size_t m = 10000;
 
  private:
-  long correct_test_output_data_ = 0;
+  std::int64_t correct_test_output_data_ = 0;
   InType input_data_;
 
   void SetUp() override {
@@ -34,12 +38,12 @@ class KarpichIMatrixElemSumPerfTest : public ppc::util::BaseRunPerfTests<InType,
     std::mt19937 gen(seed);
     std::uniform_int_distribution<> idis;
 
-    std::vector<int> res(rows * cols);
+    std::vector<int> res((rows * cols));
     correct_test_output_data_ = 0;
 
     for (std::size_t row = 0; row < rows; ++row) {
       for (std::size_t col = 0; col < cols; ++col) {
-        const std::size_t idx = row * cols + col;
+        const std::size_t idx = (row * cols) + col;
         res[idx] = idis(gen);
         correct_test_output_data_ += res[idx];
       }

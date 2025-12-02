@@ -3,6 +3,7 @@
 
 #include <array>
 #include <cstddef>
+#include <cstdint>
 #include <fstream>
 #include <random>
 #include <stdexcept>
@@ -39,7 +40,7 @@ class KarpichIMatrixElemSumTests : public ppc::util::BaseRunFuncTests<InType, Ou
       std::string local = first_param + ".txt";
       std::string abs_path = ppc::util::GetAbsoluteTaskPath(PPC_ID_karpich_i_matrix_elem_sum, local);
       std::ifstream file(abs_path);
-      if (file.is_open() == false) {
+      if (!file.is_open()) {
         throw std::runtime_error("Failed to open file: " + abs_path);
       }
 
@@ -63,14 +64,14 @@ class KarpichIMatrixElemSumTests : public ppc::util::BaseRunFuncTests<InType, Ou
 
  private:
   InType input_data_;
-  long correct_test_output_data_;
+  std::int64_t correct_test_output_data_ = 0;
   std::vector<int> GenMatrix(std::size_t n, std::size_t m, int seed) {
     std::mt19937 gen(seed);
     std::uniform_int_distribution<> idis;
     std::vector<int> res(n * m);
     correct_test_output_data_ = 0;
 
-    for (std::size_t i = 0; i < n * m; i++) {
+    for (std::size_t i = 0; i < (n * m); i++) {
       res[i] = idis(gen);
       correct_test_output_data_ += res[i];
     }

@@ -2,6 +2,10 @@
 
 #include <mpi.h>
 
+#include <cstddef>
+#include <cstdint>
+#include <iostream>
+#include <string>
 #include <vector>
 
 #include "karpich_i_matrix_elem_sum/common/include/common.hpp"
@@ -30,7 +34,7 @@ bool KarpichIMatrixElemSumMPI::RunImpl() {
   std::size_t n = std::get<0>(GetInput());
   std::size_t m = std::get<1>(GetInput());
   std::vector<int> &val = std::get<2>(GetInput());
-  if (((n > 0) && (m > 0) && (val.size() == (n * m))) == false) {
+  if (!((n > 0) && (m > 0) && (val.size() == (n * m)))) {
     return false;
   }
   int rank = 0;
@@ -46,14 +50,14 @@ bool KarpichIMatrixElemSumMPI::RunImpl() {
     end = val.size();
   }
 
-  long sum = 0;
+  std::int64_t sum = 0;
   for (std::size_t i = start; i < end; i++) {
     sum += val[i];
   }
 
-  const long send_sum = sum;
-  MPI_Reduce(&send_sum, &sum, 1, MPI_LONG, MPI_SUM, 0, MPI_COMM_WORLD);
-  MPI_Bcast(&sum, 1, MPI_LONG, 0, MPI_COMM_WORLD);
+  const std::int64_t send_sum = sum;
+  MPI_Reduce(&send_sum, &sum, 1, MPI_INT64_T, MPI_SUM, 0, MPI_COMM_WORLD);
+  MPI_Bcast(&sum, 1, MPI_INT64_T, 0, MPI_COMM_WORLD);
 
   std::string out = std::to_string(rank) + ": " + std::to_string(start) + " " + std::to_string(end) + " " +
                     std::to_string(sum) + "\n";
