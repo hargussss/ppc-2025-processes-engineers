@@ -16,7 +16,7 @@ KarpichIMatrixElemSumSEQ::KarpichIMatrixElemSumSEQ(const InType &in) {
 bool KarpichIMatrixElemSumSEQ::ValidationImpl() {
   std::size_t n = std::get<0>(GetInput());
   std::size_t m = std::get<1>(GetInput());
-  std::vector<int>& val = std::get<2>(GetInput());
+  std::vector<int> &val = std::get<2>(GetInput());
 
   return (n > 0) && (m > 0) && (val.size() == (n * m));
 }
@@ -31,7 +31,7 @@ bool KarpichIMatrixElemSumSEQ::RunImpl() {
   // }
   std::size_t n = std::get<0>(GetInput());
   std::size_t m = std::get<1>(GetInput());
-  std::vector<int>& val = std::get<2>(GetInput());
+  std::vector<int> &val = std::get<2>(GetInput());
   if (((n > 0) && (m > 0) && (val.size() == (n * m))) == false) {
     return false;
   }

@@ -10,9 +10,12 @@
 namespace karpich_i_matrix_elem_sum {
 
 class KarpichIMatrixElemSumPerfTest : public ppc::util::BaseRunPerfTests<InType, OutType> {
+ public:
   std::size_t n = 10000;
   std::size_t m = 10000;
-  long correct_test_output_data_;
+
+ private:
+  long correct_test_output_data_ = 0;
   InType input_data_;
 
   void SetUp() override {
@@ -27,15 +30,19 @@ class KarpichIMatrixElemSumPerfTest : public ppc::util::BaseRunPerfTests<InType,
     return input_data_;
   }
 
-  std::vector<int> GenMatrix(std::size_t n, std::size_t m, int seed) {
+  std::vector<int> GenMatrix(std::size_t rows, std::size_t cols, int seed) {
     std::mt19937 gen(seed);
     std::uniform_int_distribution<> idis;
-    std::vector<int> res(n * m);
+
+    std::vector<int> res(rows * cols);
     correct_test_output_data_ = 0;
 
-    for (std::size_t i = 0; i < n * m; i++) {
-      res[i] = idis(gen);
-      correct_test_output_data_ += res[i];
+    for (std::size_t row = 0; row < rows; ++row) {
+      for (std::size_t col = 0; col < cols; ++col) {
+        const std::size_t idx = row * cols + col;
+        res[idx] = idis(gen);
+        correct_test_output_data_ += res[idx];
+      }
     }
     return res;
   }
@@ -49,8 +56,8 @@ const auto kAllPerfTasks = ppc::util::MakeAllPerfTasks<InType, KarpichIMatrixEle
     PPC_SETTINGS_karpich_i_matrix_elem_sum);
 
 const auto kGtestValues = ppc::util::TupleToGTestValues(kAllPerfTasks);
-
 const auto kPerfTestName = KarpichIMatrixElemSumPerfTest::CustomPerfTestName;
 
 INSTANTIATE_TEST_SUITE_P(RunModeTests, KarpichIMatrixElemSumPerfTest, kGtestValues, kPerfTestName);
+
 }  // namespace karpich_i_matrix_elem_sum
