@@ -34,7 +34,7 @@ bool KarpichIMatrixElemSumMPI::RunImpl() {
   std::size_t n = std::get<0>(GetInput());
   std::size_t m = std::get<1>(GetInput());
   std::vector<int> &val = std::get<2>(GetInput());
-  if (!((n > 0) && (m > 0) && (val.size() == (n * m)))) {
+  if (n == 0 || m == 0 || val.size() != (n * m)) {
     return false;
   }
   int rank = 0;
