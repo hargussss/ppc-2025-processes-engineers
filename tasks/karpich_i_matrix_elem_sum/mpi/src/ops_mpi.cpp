@@ -66,11 +66,13 @@ bool KarpichIMatrixElemSumMPI::RunImpl() {
   MPI_Scatterv(val.data(), send_counts.data(), displacements.data(), MPI_INT, local_data.data(), local_size, MPI_INT, 0,
                MPI_COMM_WORLD);
 
-  const std::int64_t send_sum = sum;
-  MPI_Reduce(&send_sum, &sum, 1, MPI_INT64_T, MPI_SUM, 0, MPI_COMM_WORLD);
-  MPI_Bcast(&sum, 1, MPI_INT64_T, 0, MPI_COMM_WORLD);
+  std::int64_t local_sum = std::accumulate(local_data.begin(), local_data.end(), static_cast<std::int64_t>(0));
 
-  GetOutput() = sum;
+  std::int64_t global_sum = 0;
+  MPI_Reduce(&local_sum, &global_sum, 1, MPI_INT64_T, MPI_SUM, 0, MPI_COMM_WORLD);
+  MPI_Bcast(&global_sum, 1, MPI_INT64_T, 0, MPI_COMM_WORLD);
+
+  GetOutput() = global_sum;
   return true;
 }
 
