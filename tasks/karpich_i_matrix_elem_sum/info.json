@@ -1,9 +1,9 @@
 {
-  "student": {
-    "first_name": "Иван",
-    "last_name": "Карпич",
-    "middle_name": "Валерьевич ",
-    "group_number": "3823Б1ПР1",
-    "task_number": "1"
-  }
+    "student": {
+        "first_name": "Иван",
+        "last_name": "Карпич",
+        "middle_name": "Валерьевич",
+        "group_number": "3823Б1ПР1",
+        "task_number": "1"
+    }
 }

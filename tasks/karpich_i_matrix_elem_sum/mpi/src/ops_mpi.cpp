@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <iostream>
+#include <numeric>
 #include <string>
 #include <vector>
 
@@ -31,39 +32,45 @@ bool KarpichIMatrixElemSumMPI::PreProcessingImpl() {
 }
 
 bool KarpichIMatrixElemSumMPI::RunImpl() {
-  std::size_t n = std::get<0>(GetInput());
-  std::size_t m = std::get<1>(GetInput());
   std::vector<int> &val = std::get<2>(GetInput());
-  if (n == 0 || m == 0 || val.size() != (n * m)) {
-    return false;
-  }
+
   int rank = 0;
   int mpi_size = 0;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 
-  std::size_t iter = val.size() / mpi_size;
-  std::size_t start = iter * rank;
-  std::size_t end = start + iter;
+  int total_elements = 0;
+  if (rank == 0) {
+    total_elements = val.size();
+  }
+  MPI_Bcast(&total_elements, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
-  if (rank == mpi_size - 1) {
-    end = val.size();
+  int elements_per_proc = total_elements / mpi_size;
+  int remainder = total_elements % mpi_size;
+
+  std::vector<int> send_counts(mpi_size, elements_per_proc);
+  std::vector<int> displacements(mpi_size, 0);
+
+  for (int i = 0; i < remainder; ++i) {
+    send_counts[i]++;
   }
 
-  std::int64_t sum = 0;
-  for (std::size_t i = start; i < end; i++) {
-    sum += val[i];
+  displacements[0] = 0;
+  for (int i = 1; i < mpi_size; ++i) {
+    displacements[i] = displacements[i - 1] + send_counts[i - 1];
   }
+
+  int local_size = send_counts[rank];
+  std::vector<int> local_data(local_size);
+
+  MPI_Scatterv(val.data(), send_counts.data(), displacements.data(), MPI_INT, local_data.data(), local_size, MPI_INT, 0,
+               MPI_COMM_WORLD);
 
   const std::int64_t send_sum = sum;
   MPI_Reduce(&send_sum, &sum, 1, MPI_INT64_T, MPI_SUM, 0, MPI_COMM_WORLD);
   MPI_Bcast(&sum, 1, MPI_INT64_T, 0, MPI_COMM_WORLD);
 
-  std::string out = std::to_string(rank) + ": " + std::to_string(start) + " " + std::to_string(end) + " " +
-                    std::to_string(sum) + "\n";
-  std::cout << out;
   GetOutput() = sum;
-
   return true;
 }
 

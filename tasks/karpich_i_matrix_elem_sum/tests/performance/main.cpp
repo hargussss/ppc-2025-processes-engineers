@@ -36,7 +36,7 @@ class KarpichIMatrixElemSumPerfTest : public ppc::util::BaseRunPerfTests<InType,
 
   std::vector<int> GenMatrix(std::size_t rows, std::size_t cols, int seed) {
     std::mt19937 gen(seed);
-    std::uniform_int_distribution<> idis;
+    std::uniform_int_distribution<> idis(0, 1000000);
 
     std::vector<int> res((rows * cols));
     correct_test_output_data_ = 0;
