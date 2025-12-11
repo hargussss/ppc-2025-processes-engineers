@@ -167,6 +167,6 @@ MPI_Bcast(&global_sum, 1, MPI_INT64_T, 0, MPI_COMM_WORLD);
 
 ## Источники
 
-1. Сысоев А. В. Курс лекций по параллельному программированию
+1. Сысоев А.В. Курс лекций по параллельному программированию
 2. Документация Open MPI https://www.open-mpi.org/doc/
 3. Microsoft Функции MPI https://learn.microsoft.com/ru-ru/message-passing-interface/mpi-functions
