@@ -43,9 +43,9 @@ using OutType = std::int64_t;
 **Код**
 
 ```cpp
-long sum = 0;
-for (std::size_t i = 0; i < val.size(); i++) {
-  sum += val[i];
+std::int64_t sum = 0;
+for (int v : val) {
+  sum += v;
 }
 ```
 
