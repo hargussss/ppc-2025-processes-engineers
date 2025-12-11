@@ -4,9 +4,7 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <iostream>
 #include <numeric>
-#include <string>
 #include <vector>
 
 #include "karpich_i_matrix_elem_sum/common/include/common.hpp"
@@ -41,7 +39,7 @@ bool KarpichIMatrixElemSumMPI::RunImpl() {
 
   int total_elements = 0;
   if (rank == 0) {
-    total_elements = val.size();
+    total_elements = static_cast<int>(val.size());
   }
   MPI_Bcast(&total_elements, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
