@@ -1,4 +1,4 @@
-#include "karpich_i_seidol_method/mpi/include/ops_mpi.hpp"
+#include "karpich_i_seidel_method/mpi/include/ops_mpi.hpp"
 
 #include <mpi.h>
 
@@ -7,7 +7,7 @@
 #include <cstddef>
 #include <vector>
 
-#include "karpich_i_seidol_method/common/include/common.hpp"
+#include "karpich_i_seidel_method/common/include/common.hpp"
 
 namespace karpich_i_seidel_method {
 
@@ -76,7 +76,7 @@ bool KarpichISeidolMethodMPI::RunImpl() {
   while (iter_continue) {
     for (std::size_t i = 0; i < lb.size(); i++) {
       std::size_t row = displ_b[rank] + i;
-      double ix = lb[i];
+      double ix = local_b[i];
       for (std::size_t j = 0; j < row; j++) {
         ix = ix - (la[(i * n) + j] * x[j]);
       }
@@ -84,8 +84,8 @@ bool KarpichISeidolMethodMPI::RunImpl() {
         ix = ix - (la[(i * n) + j] * x[j]);
       }
 
-      ix = ix / la[(i * n) + row];
-      epsilons[row] = std::fabs(iter_x - x[row]);
+      ix = ix / local_a[(i * n) + row];
+      epsilons[g_row] = std::fabs(ix - x[row]);
       epsilons_new[i] = epsilons[row];
       x[row] = ix;
       x_new[i] = ix;
@@ -93,14 +93,17 @@ bool KarpichISeidolMethodMPI::RunImpl() {
     MPI_Allgatherv(x_new.data(), static_cast<int>(x_new.size()), MPI_DOUBLE, x.data(), send_counts_b.data(),
                    displ_b.data(), MPI_DOUBLE, MPI_COMM_WORLD);
 
-    MPI_Allgatherv(epsilons_new.data(), static_cast<int>(iter_eps_new.size()), MPI_DOUBLE, epsilons.data(),
+    MPI_Allgatherv(epsilons_new.data(), static_cast<int>(epsilons_new.size()), MPI_DOUBLE, epsilons.data(),
                    send_counts_b.data(), displ_b.data(), MPI_DOUBLE, MPI_COMM_WORLD);
 
     iter_continue = !IterContinue(epsilons, eps);
   }
 
   GetOutput() = x;
-
+  if (rank != 0) {
+    delete[] a;
+    delete[] b;
+  }
   return true;
 }
 
