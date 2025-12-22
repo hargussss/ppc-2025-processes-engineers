@@ -1,4 +1,4 @@
-#include "karpich_i_seidel_method/seq/include/ops_seq.hpp"
+#include "karpich_i_seidol_method/seq/include/ops_seq.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -6,7 +6,7 @@
 #include <tuple>
 #include <vector>
 
-#include "karpich_i_seidel_method/common/include/common.hpp"
+#include "karpich_i_seidol_method/common/include/common.hpp"
 
 namespace karpich_i_seidel_method {
 

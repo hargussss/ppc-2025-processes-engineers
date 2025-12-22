@@ -1,4 +1,4 @@
-#include "karpich_i_seidel_method/mpi/include/ops_mpi.hpp"
+#include "karpich_i_seidol_method/mpi/include/ops_mpi.hpp"
 
 #include <mpi.h>
 
@@ -7,7 +7,7 @@
 #include <cstddef>
 #include <vector>
 
-#include "karpich_i_seidel_method/common/include/common.hpp"
+#include "karpich_i_seidol_method/common/include/common.hpp"
 
 namespace karpich_i_seidel_method {
 

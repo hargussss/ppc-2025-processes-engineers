@@ -3,7 +3,7 @@
 #include <cstddef>
 #include <vector>
 
-#include "karpich_i_seidel_method/common/include/common.hpp"
+#include "karpich_i_seidol_method/common/include/common.hpp"
 #include "task/include/task.hpp"
 
 namespace karpich_i_seidel_method {
