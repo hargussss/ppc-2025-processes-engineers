@@ -76,7 +76,7 @@ bool KarpichISeidolMethodMPI::RunImpl() {
   while (iter_continue) {
     for (std::size_t i = 0; i < lb.size(); i++) {
       std::size_t row = displ_b[rank] + i;
-      double ix = local_b[i];
+      double ix = lb[i];
       for (std::size_t j = 0; j < row; j++) {
         ix = ix - (la[(i * n) + j] * x[j]);
       }
@@ -84,8 +84,8 @@ bool KarpichISeidolMethodMPI::RunImpl() {
         ix = ix - (la[(i * n) + j] * x[j]);
       }
 
-      ix = ix / local_a[(i * n) + row];
-      epsilons[g_row] = std::fabs(iter_x - x[row]);
+      ix = ix / la[(i * n) + row];
+      epsilons[row] = std::fabs(iter_x - x[row]);
       epsilons_new[i] = epsilons[row];
       x[row] = ix;
       x_new[i] = ix;
