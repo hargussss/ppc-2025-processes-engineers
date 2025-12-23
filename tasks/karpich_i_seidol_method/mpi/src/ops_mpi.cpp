@@ -47,13 +47,13 @@ bool KarpichISeidolMethodMPI::RunImpl() {
   int step = static_cast<int>(n) / mpi_size;
   int remainder = static_cast<int>(n) % mpi_size;
 
-  std::vector<int> send_counts_a(mpi_size, step * n);
+  std::vector<int> send_counts_a(mpi_size, static_cast<int>(step * n));
   std::vector<int> send_counts_b(mpi_size, step);
   std::vector<int> displ_a(mpi_size, 0);
   std::vector<int> displ_b(mpi_size, 0);
   for (int i = 0; i < remainder; ++i) {
     send_counts_b[i]++;
-    send_counts_a[i] += n;
+    send_counts_a[i] += static_cast<int>(n);
   }
   for (int i = 1; i < mpi_size; ++i) {
     displ_b[i] = displ_b[i - 1] + send_counts_b[i - 1];

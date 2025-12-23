@@ -4,9 +4,7 @@
 #include <array>
 #include <cmath>
 #include <cstddef>
-#include <fstream>
 #include <random>
-#include <stdexcept>
 #include <string>
 #include <tuple>
 #include <vector>
@@ -32,7 +30,7 @@ class KarpichISeidolMethodFuncTestsProcesses : public ppc::util::BaseRunFuncTest
     int seed = std::get<2>(params);
     task_eps_ = std::get<3>(params);
 
-    std::vector<double> a(n * n, 0.0);
+    std::vector<double> a(static_cast<std::size_t>(n) * static_cast<std::size_t>(n), 0.0);
     std::vector<double> b(n, 0.0);
     std::vector<double> x(n, 0.0);
 
